@@ -1,0 +1,1465 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Cpath d='M18 18h28v7H18zM18 29h28v7H18zM18 40h18v7H18z' fill='white'/%3E%3Ccircle cx='47' cy='45' r='8' fill='%2315803d'/%3E%3Cpath d='m43.5 45 2.3 2.4 5-5.3' fill='none' stroke='white' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <title>Form Input Data</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --text: #182230;
+      --muted: #667085;
+      --line: #d9e2ec;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --danger: #dc2626;
+      --success: #15803d;
+      --shadow: 0 18px 50px rgba(15, 23, 42, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #eef6ff 0%, #f8fafc 48%, #eff6f1 100%);
+      color: var(--text);
+    }
+
+    main {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0;
+    }
+
+    .app-shell {
+      display: none;
+    }
+
+    .app-shell.active {
+      display: block;
+    }
+
+    .login-screen {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .login-card {
+      width: min(100%, 420px);
+      padding: 28px;
+    }
+
+    .login-card h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .login-card p {
+      margin: 0 0 22px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .login-error {
+      display: none;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #fee2e2;
+      color: var(--danger);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .login-error.show {
+      display: block;
+    }
+
+    .login-hint {
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #eef6ff;
+      color: #344054;
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 700;
+    }
+
+    .header {
+      margin-bottom: 22px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .user-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 42px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #eaf2ff;
+      color: #1d4ed8;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .db-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 42px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #eef2f7;
+      color: #344054;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .form-panel.disabled {
+      opacity: 0.72;
+    }
+
+    .header h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .header p {
+      margin: 0;
+      max-width: 720px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(217, 226, 236, 0.85);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .form-panel {
+      padding: 22px;
+      position: sticky;
+      top: 24px;
+    }
+
+    .table-panel {
+      overflow: hidden;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .panel-title h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .counter {
+      min-width: 36px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #eaf2ff;
+      color: #1d4ed8;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    form {
+      display: grid;
+      gap: 14px;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: #344054;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 13px;
+      color: var(--text);
+      background: #ffffff;
+      font: inherit;
+      outline: none;
+      transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    .photo-upload {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .photo-preview,
+    .photo-thumb,
+    .photo-fallback {
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #eaf2ff;
+      color: #1d4ed8;
+      font-weight: 700;
+    }
+
+    .photo-preview {
+      width: 64px;
+      height: 64px;
+      border: 1px solid var(--line);
+      object-fit: cover;
+    }
+
+    .photo-thumb,
+    .photo-fallback {
+      width: 42px;
+      height: 42px;
+      font-size: 13px;
+    }
+
+    .photo-thumb {
+      object-fit: cover;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 120ms ease, background 120ms ease, color 120ms ease;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      flex: 1;
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: #eef2f7;
+      color: #344054;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    .table-tools {
+      display: flex;
+      gap: 12px;
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .table-tools input {
+      max-width: 360px;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1040px;
+    }
+
+    th,
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #edf1f5;
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #475467;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    tr:hover td {
+      background: #fbfdff;
+    }
+
+    .status {
+      display: inline-flex;
+      min-width: 82px;
+      justify-content: center;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status.aktif {
+      background: #dcfce7;
+      color: var(--success);
+    }
+
+    .status.nonaktif {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .flow {
+      display: inline-flex;
+      min-width: 126px;
+      justify-content: center;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .flow.checker {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .flow.signer {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .flow.approved {
+      background: #dcfce7;
+      color: var(--success);
+    }
+
+    .flow.rejected {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .row-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-width: 210px;
+    }
+
+    .btn-small {
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: #344054;
+      font-size: 13px;
+    }
+
+    .btn-small:hover {
+      background: #f8fafc;
+    }
+
+    .btn-danger {
+      color: var(--danger);
+    }
+
+    .btn-approve {
+      color: var(--success);
+    }
+
+    .empty {
+      padding: 34px 18px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      max-width: calc(100% - 36px);
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #101828;
+      color: #ffffff;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 860px) {
+      main {
+        width: min(100% - 24px, 720px);
+        padding: 22px 0;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .form-panel {
+        position: static;
+      }
+
+      .table-tools {
+        display: block;
+      }
+
+      .table-tools input {
+        max-width: none;
+      }
+
+      .topbar {
+        display: grid;
+      }
+
+      .topbar-actions {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="login-screen" id="loginScreen" aria-label="Login pengguna">
+    <div class="panel login-card">
+      <h1>Login Pengguna</h1>
+      <p>Masuk terlebih dahulu untuk mengelola data.</p>
+
+      <form id="loginForm" autocomplete="off">
+        <div class="login-error" id="loginError">Username atau password salah.</div>
+
+        <div class="login-hint">Maker: maker / maker123 | Checker: cheker / cheker123 | Signer: admin / admin123</div>
+
+        <label for="username">
+          Username
+          <input id="username" name="username" type="text" placeholder="Masukkan username" required>
+        </label>
+
+        <label for="password">
+          Password
+          <input id="password" name="password" type="password" placeholder="Masukkan password" required>
+        </label>
+
+        <button class="btn-primary" type="submit">Masuk</button>
+      </form>
+    </div>
+  </section>
+
+  <main class="app-shell" id="appShell">
+    <section class="topbar">
+      <div class="header">
+        <h1>Form Input Data</h1>
+        <p>Masukkan data, simpan, lalu kelola daftar melalui tabel. Data tersimpan otomatis di database online jika Firebase sudah dikonfigurasi.</p>
+      </div>
+      <div class="topbar-actions">
+        <span class="user-badge" id="userBadge">Role</span>
+        <span class="db-badge" id="dbBadge">Database Lokal</span>
+        <button class="btn-secondary" type="button" id="exportButton">Export Data</button>
+        <button class="btn-secondary" type="button" id="logoutButton">Logout</button>
+      </div>
+    </section>
+
+    <section class="layout" aria-label="Aplikasi input data">
+      <div class="panel form-panel">
+        <div class="panel-title">
+          <h2 id="formTitle">Tambah Data</h2>
+          <span class="counter" id="dataCount">0</span>
+        </div>
+
+        <form id="dataForm" autocomplete="off">
+          <input type="hidden" id="recordId">
+
+          <label for="nama">
+            Nama Lengkap
+            <input id="nama" name="nama" type="text" placeholder="Contoh: Andi Saputra" required>
+          </label>
+
+          <label for="fotoProfil">
+            Foto Profil
+            <div class="photo-upload">
+              <img class="photo-preview" id="photoPreview" alt="Preview foto profil">
+              <input id="fotoProfil" name="fotoProfil" type="file" accept="image/*">
+            </div>
+          </label>
+
+          <label for="email">
+            Email
+            <input id="email" name="email" type="email" placeholder="nama@email.com" required>
+          </label>
+
+          <label for="telepon">
+            No. Telepon
+            <input id="telepon" name="telepon" type="tel" placeholder="08xxxxxxxxxx" required>
+          </label>
+
+          <label for="kategori">
+            Kategori
+            <select id="kategori" name="kategori" required>
+              <option value="">Pilih kategori</option>
+              <option>Mahasiswa</option>
+              <option>Karyawan</option>
+              <option>Pelanggan</option>
+              <option>Umum</option>
+            </select>
+          </label>
+
+          <label for="jabatan">
+            Jabatan
+            <select id="jabatan" name="jabatan" required>
+              <option value="">Pilih jabatan</option>
+              <option>Admin</option>
+              <option>Manager</option>
+              <option>Supervisor</option>
+              <option>Staff</option>
+              <option>HRD</option>
+              <option>Finance</option>
+              <option>Marketing</option>
+              <option>IT</option>
+            </select>
+          </label>
+
+          <label for="status">
+            Status
+            <select id="status" name="status" required>
+              <option value="Aktif">Aktif</option>
+              <option value="Nonaktif">Nonaktif</option>
+            </select>
+          </label>
+
+          <label for="alamat">
+            Alamat
+            <textarea id="alamat" name="alamat" placeholder="Masukkan alamat singkat" required></textarea>
+          </label>
+
+          <div class="actions">
+            <button class="btn-primary" type="submit" id="submitButton">Simpan Data</button>
+            <button class="btn-secondary" type="button" id="resetButton">Reset</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel table-panel">
+        <div class="table-tools">
+          <input id="searchInput" type="search" placeholder="Cari nama, email, jabatan, kategori, atau status">
+        </div>
+
+        <div class="table-wrap">
+          <table aria-label="Daftar data">
+            <thead>
+              <tr>
+                <th>Foto</th>
+                <th>Nama</th>
+                <th>Email</th>
+                <th>Telepon</th>
+                <th>Kategori</th>
+                <th>Jabatan</th>
+                <th>Status</th>
+                <th>Alur</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="emptyState">Belum ada data.</div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const storageKey = 'form-input-data';
+    const dbName = 'form-input-local-db';
+    const dbVersion = 2;
+    const storeName = 'users';
+    const firebaseCollectionName = 'formInputUsers';
+    const firebaseConfig = {
+      apiKey: '',
+      authDomain: '',
+      projectId: '',
+      storageBucket: '',
+      messagingSenderId: '',
+      appId: ''
+    };
+    const sessionKey = 'admin-login-status';
+    const sessionUserKey = 'current-user';
+    const localUsers = [
+      { username: 'maker', password: 'maker123', role: 'maker', label: 'Maker' },
+      { username: 'cheker', password: 'cheker123', role: 'checker', label: 'Checker' },
+      { username: 'checker', password: 'checker123', role: 'checker', label: 'Checker' },
+      { username: 'admin', password: 'admin123', role: 'signer', label: 'Signer' }
+    ];
+    const loginScreen = document.querySelector('#loginScreen');
+    const appShell = document.querySelector('#appShell');
+    const loginForm = document.querySelector('#loginForm');
+    const loginError = document.querySelector('#loginError');
+    const userBadge = document.querySelector('#userBadge');
+    const dbBadge = document.querySelector('#dbBadge');
+    const exportButton = document.querySelector('#exportButton');
+    const logoutButton = document.querySelector('#logoutButton');
+    const form = document.querySelector('#dataForm');
+    const formPanel = document.querySelector('.form-panel');
+    const tableBody = document.querySelector('#tableBody');
+    const emptyState = document.querySelector('#emptyState');
+    const searchInput = document.querySelector('#searchInput');
+    const resetButton = document.querySelector('#resetButton');
+    const submitButton = document.querySelector('#submitButton');
+    const formTitle = document.querySelector('#formTitle');
+    const photoInput = document.querySelector('#fotoProfil');
+    const photoPreview = document.querySelector('#photoPreview');
+    const dataCount = document.querySelector('#dataCount');
+    const toast = document.querySelector('#toast');
+
+    let records = [];
+    let database = null;
+    let onlineDatabase = null;
+    let onlineApi = null;
+    let onlineDatabaseReady = false;
+    let currentUser = null;
+    const emptyPhoto = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+
+    function openDatabase() {
+      return new Promise((resolve, reject) => {
+        if (!('indexedDB' in window)) {
+          reject(new Error('IndexedDB tidak didukung browser ini.'));
+          return;
+        }
+
+        const request = indexedDB.open(dbName, dbVersion);
+
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+
+          if (!db.objectStoreNames.contains(storeName)) {
+            const store = db.createObjectStore(storeName, { keyPath: 'id' });
+            store.createIndex('nama', 'nama', { unique: false });
+            store.createIndex('email', 'email', { unique: false });
+            store.createIndex('kategori', 'kategori', { unique: false });
+            store.createIndex('jabatan', 'jabatan', { unique: false });
+            store.createIndex('status', 'status', { unique: false });
+          } else {
+            const store = event.target.transaction.objectStore(storeName);
+
+            if (!store.indexNames.contains('jabatan')) {
+              store.createIndex('jabatan', 'jabatan', { unique: false });
+            }
+          }
+        };
+
+        request.onsuccess = () => {
+          database = request.result;
+          resolve(database);
+        };
+
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function getStore(mode = 'readonly') {
+      return database.transaction(storeName, mode).objectStore(storeName);
+    }
+
+    function getAllLocalRecords() {
+      return new Promise((resolve, reject) => {
+        const request = getStore().getAll();
+
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function saveLocalRecord(record) {
+      return new Promise((resolve, reject) => {
+        const request = getStore('readwrite').put(record);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function deleteLocalRecord(id) {
+      return new Promise((resolve, reject) => {
+        const request = getStore('readwrite').delete(id);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function hasFirebaseConfig() {
+      return Object.values(firebaseConfig).every((value) => value.trim());
+    }
+
+    async function initializeOnlineDatabase() {
+      if (!hasFirebaseConfig()) return;
+
+      try {
+        const appModule = await import('https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js');
+        const firestoreModule = await import('https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js');
+        const app = appModule.initializeApp(firebaseConfig);
+
+        onlineDatabase = firestoreModule.getFirestore(app);
+        onlineApi = firestoreModule;
+        onlineDatabaseReady = true;
+      } catch (error) {
+        onlineDatabaseReady = false;
+        console.error(error);
+        showToast('Database online gagal dibuka. Memakai data lokal.');
+      }
+    }
+
+    async function getAllRecords() {
+      if (onlineDatabaseReady) {
+        try {
+          const querySnapshot = await onlineApi.getDocs(
+            onlineApi.collection(onlineDatabase, firebaseCollectionName)
+          );
+          const onlineRecords = querySnapshot.docs.map((documentSnapshot) => {
+            return {
+              id: documentSnapshot.id,
+              ...documentSnapshot.data()
+            };
+          });
+
+          await Promise.all(onlineRecords.map((record) => saveLocalRecord(record)));
+          return onlineRecords;
+        } catch (error) {
+          console.error(error);
+          showToast('Gagal mengambil data online. Memakai data lokal.');
+        }
+      }
+
+      return getAllLocalRecords();
+    }
+
+    async function saveRecord(record) {
+      if (onlineDatabaseReady) {
+        try {
+          await onlineApi.setDoc(
+            onlineApi.doc(onlineDatabase, firebaseCollectionName, record.id),
+            record
+          );
+        } catch (error) {
+          console.error(error);
+          showToast('Gagal menyimpan online. Data disimpan lokal.');
+        }
+      }
+
+      await saveLocalRecord(record);
+    }
+
+    async function deleteRecord(id) {
+      if (onlineDatabaseReady) {
+        try {
+          await onlineApi.deleteDoc(
+            onlineApi.doc(onlineDatabase, firebaseCollectionName, id)
+          );
+        } catch (error) {
+          console.error(error);
+          showToast('Gagal menghapus online. Data lokal tetap dihapus.');
+        }
+      }
+
+      await deleteLocalRecord(id);
+    }
+
+    async function syncLocalRecordsToOnline() {
+      if (!onlineDatabaseReady) return;
+
+      const localRecords = await getAllLocalRecords();
+      if (!localRecords.length) return;
+
+      const querySnapshot = await onlineApi.getDocs(
+        onlineApi.collection(onlineDatabase, firebaseCollectionName)
+      );
+
+      if (!querySnapshot.empty) return;
+
+      await Promise.all(localRecords.map((record) => saveRecord(record)));
+    }
+
+    async function loadRecords() {
+      records = await getAllRecords();
+      records.sort((first, second) => (second.createdAt || '').localeCompare(first.createdAt || ''));
+    }
+
+    async function migrateLocalStorageData() {
+      const oldRecords = JSON.parse(localStorage.getItem(storageKey) || '[]');
+
+      if (!oldRecords.length) return;
+
+      const existingRecords = await getAllLocalRecords();
+      if (existingRecords.length) return;
+
+      await Promise.all(oldRecords.map((record) => {
+        return saveRecord({
+          ...record,
+          createdAt: record.createdAt || new Date().toISOString(),
+          updatedAt: record.updatedAt || new Date().toISOString()
+        });
+      }));
+      localStorage.removeItem(storageKey);
+    }
+
+    async function initializeDatabase() {
+      try {
+        await openDatabase();
+        await migrateLocalStorageData();
+        await initializeOnlineDatabase();
+        await syncLocalRecordsToOnline();
+        await loadRecords();
+      } catch (error) {
+        console.error(error);
+        showToast('Database lokal gagal dibuka.');
+      }
+    }
+
+    async function showApp() {
+      loginScreen.style.display = 'none';
+      appShell.classList.add('active');
+      applyRoleAccess();
+      await loadRecords();
+      renderTable();
+    }
+
+    function showLogin() {
+      loginScreen.style.display = 'grid';
+      appShell.classList.remove('active');
+      loginForm.reset();
+      loginError.classList.remove('show');
+      document.querySelector('#username').focus();
+    }
+
+    function findUser(username, password) {
+      return localUsers.find((user) => {
+        return user.username === username && user.password === password;
+      });
+    }
+
+    function saveCurrentUser(user) {
+      currentUser = user;
+      sessionStorage.setItem(sessionUserKey, JSON.stringify(user));
+    }
+
+    function loadCurrentUser() {
+      currentUser = JSON.parse(sessionStorage.getItem(sessionUserKey) || 'null');
+      return currentUser;
+    }
+
+    function clearCurrentUser() {
+      currentUser = null;
+      sessionStorage.removeItem(sessionUserKey);
+    }
+
+    function canUseForm() {
+      return ['maker', 'signer'].includes(currentUser?.role);
+    }
+
+    function canEditRecord(record) {
+      if (currentUser?.role === 'signer') return true;
+
+      const status = getWorkflowStatus(record);
+      return canUseForm() && ['Menunggu Checker', 'Ditolak'].includes(status);
+    }
+
+    function applyRoleAccess() {
+      const canManageData = canUseForm();
+      userBadge.textContent = currentUser ? `${currentUser.label}: ${currentUser.username}` : 'Role';
+      dbBadge.textContent = onlineDatabaseReady ? 'Database Online' : 'Database Lokal';
+      formPanel.classList.toggle('disabled', !canManageData);
+
+      form.querySelectorAll('input, select, textarea, button').forEach((element) => {
+        element.disabled = !canManageData;
+      });
+
+      submitButton.textContent = canManageData ? 'Simpan Data' : 'Hanya Maker/Admin';
+      resetButton.disabled = !canManageData;
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      window.setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    function getInitials(name) {
+      return name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((word) => word.charAt(0).toUpperCase())
+        .join('') || '?';
+    }
+
+    function setPhotoPreview(photo) {
+      if (photo) {
+        photoPreview.src = photo;
+        return;
+      }
+
+      photoPreview.src = emptyPhoto;
+    }
+
+    function readPhotoFile(file) {
+      return new Promise((resolve, reject) => {
+        if (!file) {
+          resolve('');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function exportRecords() {
+      if (!records.length) {
+        showToast('Belum ada data untuk diexport.');
+        return;
+      }
+
+      const rows = records.map((record, index) => {
+        const photo = record.fotoProfil
+          ? `<img src="${record.fotoProfil}" width="42" height="42" style="object-fit:cover;border-radius:50%;">`
+          : '';
+
+        return `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${photo}</td>
+            <td>${escapeHtml(record.nama)}</td>
+            <td>${escapeHtml(record.email)}</td>
+            <td>${escapeHtml(record.telepon)}</td>
+            <td>${escapeHtml(record.kategori)}</td>
+            <td>${escapeHtml(record.jabatan)}</td>
+            <td>${escapeHtml(record.status)}</td>
+            <td>${escapeHtml(getWorkflowStatus(record))}</td>
+            <td>${escapeHtml(record.alamat)}</td>
+            <td>${escapeHtml(record.makerBy)}</td>
+            <td>${escapeHtml(record.checkerBy)}</td>
+            <td>${escapeHtml(record.signerBy)}</td>
+            <td>${escapeHtml(record.catatanApproval)}</td>
+            <td>${escapeHtml(record.createdAt)}</td>
+            <td>${escapeHtml(record.updatedAt)}</td>
+          </tr>
+        `;
+      }).join('');
+      const excelContent = `
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              table { border-collapse: collapse; font-family: Arial, sans-serif; }
+              th, td { border: 1px solid #d9e2ec; padding: 8px; vertical-align: middle; }
+              th { background: #eaf2ff; font-weight: bold; }
+            </style>
+          </head>
+          <body>
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Foto</th>
+                  <th>Nama</th>
+                  <th>Email</th>
+                  <th>Telepon</th>
+                  <th>Kategori</th>
+                  <th>Jabatan</th>
+                  <th>Status</th>
+                  <th>Alur</th>
+                  <th>Alamat</th>
+                  <th>Maker</th>
+                  <th>Checker</th>
+                  <th>Signer</th>
+                  <th>Catatan Approval</th>
+                  <th>Dibuat</th>
+                  <th>Diupdate</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </body>
+        </html>
+      `;
+      const blob = new Blob(['\ufeff', excelContent], { type: 'application/vnd.ms-excel' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const date = new Date().toISOString().slice(0, 10);
+
+      link.href = url;
+      link.download = `form-input-data-${date}.xls`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      showToast('Data berhasil diexport ke Excel.');
+    }
+
+    function getWorkflowStatus(record) {
+      return record.statusPersetujuan || 'Menunggu Checker';
+    }
+
+    function getWorkflowClass(status) {
+      if (status === 'Menunggu Checker') return 'checker';
+      if (status === 'Menunggu Signer') return 'signer';
+      if (status === 'Disetujui') return 'approved';
+      if (status === 'Ditolak') return 'rejected';
+      return 'checker';
+    }
+
+    function createActionButton(action, id, text, className = '') {
+      const button = document.createElement('button');
+      button.className = `btn-small ${className}`.trim();
+      button.type = 'button';
+      button.dataset.action = action;
+      button.dataset.id = id;
+      button.textContent = text;
+      return button;
+    }
+
+    async function updateWorkflow(record, statusPersetujuan, message, extraData = {}) {
+      const updatedRecord = {
+        ...record,
+        ...extraData,
+        statusPersetujuan,
+        updatedAt: new Date().toISOString()
+      };
+
+      await saveRecord(updatedRecord);
+      await loadRecords();
+      renderTable();
+      showToast(message);
+    }
+
+    async function getFormData() {
+      const now = new Date().toISOString();
+      const id = document.querySelector('#recordId').value || crypto.randomUUID();
+      const existingRecord = records.find((record) => record.id === id);
+      const selectedPhoto = await readPhotoFile(photoInput.files[0]);
+
+      return {
+        id,
+        nama: document.querySelector('#nama').value.trim(),
+        fotoProfil: selectedPhoto || existingRecord?.fotoProfil || '',
+        email: document.querySelector('#email').value.trim(),
+        telepon: document.querySelector('#telepon').value.trim(),
+        kategori: document.querySelector('#kategori').value,
+        jabatan: document.querySelector('#jabatan').value.trim(),
+        status: document.querySelector('#status').value,
+        alamat: document.querySelector('#alamat').value.trim(),
+        statusPersetujuan: 'Menunggu Checker',
+        makerBy: currentUser?.username || 'maker',
+        makerAt: now,
+        checkerAt: '',
+        signerAt: '',
+        rejectedAt: '',
+        catatanApproval: '',
+        createdAt: existingRecord?.createdAt || now,
+        updatedAt: now
+      };
+    }
+
+    function resetForm() {
+      form.reset();
+      document.querySelector('#recordId').value = '';
+      setPhotoPreview('');
+      formTitle.textContent = 'Tambah Data';
+      submitButton.textContent = 'Simpan Data';
+      document.querySelector('#nama').focus();
+    }
+
+    function renderTable() {
+      const keyword = searchInput.value.trim().toLowerCase();
+      const filtered = records.filter((record) => {
+        const searchableText = [
+          record.nama,
+          record.email,
+          record.telepon,
+          record.kategori,
+          record.jabatan,
+          record.status,
+          getWorkflowStatus(record),
+          record.alamat
+        ].join(' ');
+
+        return searchableText.toLowerCase().includes(keyword);
+      });
+
+      tableBody.innerHTML = '';
+      dataCount.textContent = records.length;
+      emptyState.style.display = filtered.length ? 'none' : 'block';
+
+      filtered.forEach((record) => {
+        const row = document.createElement('tr');
+        const statusClass = record.status.toLowerCase();
+        const photoCell = document.createElement('td');
+        const nameCell = document.createElement('td');
+        const nameText = document.createElement('strong');
+        const addressText = document.createElement('span');
+        const emailCell = document.createElement('td');
+        const phoneCell = document.createElement('td');
+        const categoryCell = document.createElement('td');
+        const positionCell = document.createElement('td');
+        const statusCell = document.createElement('td');
+        const statusBadge = document.createElement('span');
+        const flowCell = document.createElement('td');
+        const flowBadge = document.createElement('span');
+        const actionCell = document.createElement('td');
+        const actionWrap = document.createElement('div');
+        const workflowStatus = getWorkflowStatus(record);
+
+        if (record.fotoProfil) {
+          const photo = document.createElement('img');
+          photo.className = 'photo-thumb';
+          photo.src = record.fotoProfil;
+          photo.alt = `Foto profil ${record.nama}`;
+          photoCell.appendChild(photo);
+        } else {
+          const fallback = document.createElement('span');
+          fallback.className = 'photo-fallback';
+          fallback.textContent = getInitials(record.nama);
+          photoCell.appendChild(fallback);
+        }
+
+        nameText.textContent = record.nama;
+        addressText.textContent = record.alamat;
+        addressText.style.color = 'var(--muted)';
+        nameCell.append(nameText, document.createElement('br'), addressText);
+
+        emailCell.textContent = record.email;
+        phoneCell.textContent = record.telepon;
+        categoryCell.textContent = record.kategori;
+        positionCell.textContent = record.jabatan || '-';
+
+        statusBadge.className = `status ${statusClass}`;
+        statusBadge.textContent = record.status;
+        statusCell.appendChild(statusBadge);
+
+        flowBadge.className = `flow ${getWorkflowClass(workflowStatus)}`;
+        flowBadge.textContent = workflowStatus;
+        if (record.catatanApproval) {
+          flowBadge.title = record.catatanApproval;
+        }
+        flowCell.appendChild(flowBadge);
+
+        actionWrap.className = 'row-actions';
+        if (currentUser?.role === 'checker' && workflowStatus === 'Menunggu Checker') {
+          actionWrap.append(
+            createActionButton('checkerApprove', record.id, 'Checker OK', 'btn-approve'),
+            createActionButton('checkerReject', record.id, 'Tolak', 'btn-danger')
+          );
+        }
+
+        if (currentUser?.role === 'signer' && workflowStatus === 'Menunggu Signer') {
+          actionWrap.append(
+            createActionButton('signerApprove', record.id, 'Signer OK', 'btn-approve'),
+            createActionButton('signerReject', record.id, 'Tolak', 'btn-danger')
+          );
+        }
+
+        if (canEditRecord(record)) {
+          actionWrap.append(
+            createActionButton('edit', record.id, 'Edit'),
+            createActionButton('delete', record.id, 'Hapus', 'btn-danger')
+          );
+        }
+
+        if (!actionWrap.children.length) {
+          actionWrap.textContent = '-';
+        }
+        actionCell.appendChild(actionWrap);
+        row.append(photoCell, nameCell, emailCell, phoneCell, categoryCell, positionCell, statusCell, flowCell, actionCell);
+
+        tableBody.appendChild(row);
+      });
+    }
+
+    loginForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const username = document.querySelector('#username').value.trim().toLowerCase();
+      const password = document.querySelector('#password').value;
+      const user = findUser(username, password);
+
+      if (user) {
+        sessionStorage.setItem(sessionKey, 'true');
+        saveCurrentUser(user);
+        await showApp();
+        showToast(`Login berhasil sebagai ${user.label}.`);
+        return;
+      }
+
+      loginError.classList.add('show');
+      document.querySelector('#password').value = '';
+      document.querySelector('#password').focus();
+    });
+
+    logoutButton.addEventListener('click', () => {
+      sessionStorage.removeItem(sessionKey);
+      clearCurrentUser();
+      resetForm();
+      showLogin();
+      showToast('Anda sudah logout.');
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      if (!canUseForm()) {
+        showToast('Hanya Maker atau Admin yang bisa menyimpan data.');
+        return;
+      }
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const data = await getFormData();
+      const existingIndex = records.findIndex((record) => record.id === data.id);
+
+      if (existingIndex >= 0) {
+        records[existingIndex] = data;
+        showToast('Data berhasil diperbarui.');
+      } else {
+        records.unshift(data);
+        showToast('Data berhasil disimpan.');
+      }
+
+      await saveRecord(data);
+      await loadRecords();
+      resetForm();
+      renderTable();
+    });
+
+    resetButton.addEventListener('click', resetForm);
+    searchInput.addEventListener('input', renderTable);
+    exportButton.addEventListener('click', exportRecords);
+    photoInput.addEventListener('change', async () => {
+      if (!photoInput.files[0]) {
+        const id = document.querySelector('#recordId').value;
+        const existingRecord = records.find((record) => record.id === id);
+        setPhotoPreview(existingRecord?.fotoProfil || '');
+        return;
+      }
+
+      const selectedPhoto = await readPhotoFile(photoInput.files[0]);
+      setPhotoPreview(selectedPhoto);
+    });
+
+    tableBody.addEventListener('click', async (event) => {
+      const button = event.target.closest('button');
+      if (!button) return;
+
+      const id = button.dataset.id;
+      const action = button.dataset.action;
+      const record = records.find((item) => item.id === id);
+
+      if (!record) return;
+
+      if (action === 'checkerApprove') {
+        if (currentUser?.role !== 'checker') {
+          showToast('Hanya Checker yang bisa memproses data ini.');
+          return;
+        }
+
+        await updateWorkflow(record, 'Menunggu Signer', 'Data dikirim ke Signer.', {
+          checkerBy: currentUser.username,
+          checkerAt: new Date().toISOString(),
+          catatanApproval: ''
+        });
+        return;
+      }
+
+      if (action === 'checkerReject') {
+        if (currentUser?.role !== 'checker') {
+          showToast('Hanya Checker yang bisa memproses data ini.');
+          return;
+        }
+
+        const note = prompt('Catatan penolakan Checker:', record.catatanApproval || '');
+        if (note === null) return;
+
+        await updateWorkflow(record, 'Ditolak', 'Data ditolak oleh Checker.', {
+          checkerBy: currentUser.username,
+          rejectedAt: new Date().toISOString(),
+          catatanApproval: note.trim() || 'Ditolak oleh Checker'
+        });
+        return;
+      }
+
+      if (action === 'signerApprove') {
+        if (currentUser?.role !== 'signer') {
+          showToast('Hanya Signer yang bisa memproses data ini.');
+          return;
+        }
+
+        await updateWorkflow(record, 'Disetujui', 'Data disetujui oleh Signer.', {
+          signerBy: currentUser.username,
+          signerAt: new Date().toISOString(),
+          catatanApproval: ''
+        });
+        return;
+      }
+
+      if (action === 'signerReject') {
+        if (currentUser?.role !== 'signer') {
+          showToast('Hanya Signer yang bisa memproses data ini.');
+          return;
+        }
+
+        const note = prompt('Catatan penolakan Signer:', record.catatanApproval || '');
+        if (note === null) return;
+
+        await updateWorkflow(record, 'Ditolak', 'Data ditolak oleh Signer.', {
+          signerBy: currentUser.username,
+          rejectedAt: new Date().toISOString(),
+          catatanApproval: note.trim() || 'Ditolak oleh Signer'
+        });
+        return;
+      }
+
+      if (action === 'edit' && record) {
+        if (!canEditRecord(record)) {
+          showToast('Hanya Maker atau Admin yang bisa mengedit data ini.');
+          return;
+        }
+
+        document.querySelector('#recordId').value = record.id;
+        document.querySelector('#nama').value = record.nama;
+        setPhotoPreview(record.fotoProfil || '');
+        photoInput.value = '';
+        document.querySelector('#email').value = record.email;
+        document.querySelector('#telepon').value = record.telepon;
+        document.querySelector('#kategori').value = record.kategori;
+        document.querySelector('#jabatan').value = record.jabatan || '';
+        document.querySelector('#status').value = record.status;
+        document.querySelector('#alamat').value = record.alamat;
+        formTitle.textContent = 'Edit Data';
+        submitButton.textContent = 'Perbarui Data';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      if (action === 'delete' && confirm('Hapus data ini?')) {
+        if (!canEditRecord(record)) {
+          showToast('Hanya Maker atau Admin yang bisa menghapus data ini.');
+          return;
+        }
+
+        await deleteRecord(id);
+        await loadRecords();
+        renderTable();
+        showToast('Data berhasil dihapus.');
+      }
+    });
+
+    async function startApp() {
+      await initializeDatabase();
+      loadCurrentUser();
+
+      if (sessionStorage.getItem(sessionKey) === 'true' && currentUser) {
+        await showApp();
+      } else {
+        clearCurrentUser();
+        sessionStorage.removeItem(sessionKey);
+        showLogin();
+      }
+    }
+
+    setPhotoPreview('');
+    startApp();
+  </script>
+</body>
+</html>
